@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # Script to build and deploy all apps to Firebase
-# Usage: ./deploy-all-apps.sh [--skip-build] [--skip-push] [-s <app-name>]
+# Usage: ./deploy-all-apps.sh [--skip-build] [-s <app-name>]
 
 SKIP_BUILD=false
-SKIP_PUSH=false
 SINGLE_APP=""
 
 # Parse arguments
@@ -19,20 +18,16 @@ while [[ $# -gt 0 ]]; do
             fi
             shift 2
             ;;
-        --skip-build)
-            SKIP_BUILD=true
-            shift
-            ;;
-        --skip-push)
-            SKIP_PUSH=true
-            shift
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Usage: ./deploy-all-apps.sh [--skip-build] [--skip-push] [-s <app-name>]"
-            echo "Available apps: ak-dashboard, secret-santa, pickup-soccer, personal-portfolio, fm-team-draw, color-crafter, amer-gauntlet"
-            exit 1
-            ;;
+            --skip-build)
+                SKIP_BUILD=true
+                shift
+                ;;
+            *)
+                echo "Unknown option: $1"
+                echo "Usage: ./deploy-all-apps.sh [--skip-build] [-s <app-name>]"
+                echo "Available apps: ak-dashboard, secret-santa, pickup-soccer, personal-portfolio, fm-team-draw, color-crafter, amer-gauntlet"
+                exit 1
+                ;;
     esac
 done
 
@@ -60,14 +55,10 @@ echo "========================================="
 if [ "$SKIP_BUILD" = true ]; then
     echo "  [SKIP BUILD] Build step will be skipped"
 fi
-if [ "$SKIP_PUSH" = true ]; then
-    echo "  [SKIP PUSH] Git push step will be skipped"
-fi
 echo ""
 
 TOTAL_BUILT=0
 TOTAL_DEPLOYED=0
-TOTAL_PUSHED=0
 TOTAL_SKIPPED=0
 TOTAL_ERRORS=0
 
@@ -102,7 +93,7 @@ for APP_DIR in "${APP_DIRS[@]}"; do
     
     # Step 1: Build
     if [ "$SKIP_BUILD" = false ]; then
-        echo "  [1/3] Building..."
+        echo "  [1/2] Building..."
         if npm run build > /dev/null 2>&1; then
             echo "  [SUCCESS] Build completed"
             ((TOTAL_BUILT++))
@@ -116,7 +107,7 @@ for APP_DIR in "${APP_DIRS[@]}"; do
     fi
     
     # Step 2: Firebase Deploy
-    echo "  [2/3] Deploying to Firebase..."
+    echo "  [2/2] Deploying to Firebase..."
     if firebase deploy --non-interactive > /dev/null 2>&1; then
         echo "  [SUCCESS] Deployed to Firebase"
         ((TOTAL_DEPLOYED++))
@@ -124,34 +115,6 @@ for APP_DIR in "${APP_DIRS[@]}"; do
         echo "  [ERROR] Firebase deploy failed"
         ((TOTAL_ERRORS++))
         continue
-    fi
-    
-    # Step 3: Git Push (optional)
-    if [ "$SKIP_PUSH" = false ]; then
-        if [ -d "$APP_PATH/.git" ]; then
-            echo "  [3/3] Pushing to GitHub..."
-            
-            # Check if there are any changes
-            if [ -n "$(git status --porcelain)" ]; then
-                git add -A > /dev/null 2>&1
-                if git commit -m "Deploy to Firebase" > /dev/null 2>&1; then
-                    if git push > /dev/null 2>&1; then
-                        echo "  [SUCCESS] Pushed to GitHub"
-                        ((TOTAL_PUSHED++))
-                    else
-                        echo "  [WARNING] Git push failed (but deploy succeeded)"
-                    fi
-                else
-                    echo "  [SKIP] No new changes to commit"
-                fi
-            else
-                echo "  [SKIP] No changes to commit"
-            fi
-        else
-            echo "  [SKIP] Not a git repository"
-        fi
-    else
-        echo "  [SKIP] Git push step skipped"
     fi
     
     echo ""
@@ -162,7 +125,6 @@ echo "========================================="
 echo "Summary:"
 echo "  Built: $TOTAL_BUILT"
 echo "  Deployed: $TOTAL_DEPLOYED"
-echo "  Pushed: $TOTAL_PUSHED"
 echo "  Skipped: $TOTAL_SKIPPED"
 echo "  Errors: $TOTAL_ERRORS"
 echo "========================================="
