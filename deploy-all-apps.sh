@@ -18,16 +18,16 @@ while [[ $# -gt 0 ]]; do
             fi
             shift 2
             ;;
-            --skip-build)
-                SKIP_BUILD=true
-                shift
-                ;;
-            *)
-                echo "Unknown option: $1"
+        --skip-build)
+            SKIP_BUILD=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
                 echo "Usage: ./deploy-all-apps.sh [--skip-build] [-s <app-name>]"
-                echo "Available apps: ak-dashboard, secret-santa, pickup-soccer, personal-portfolio, fm-team-draw, color-crafter, amer-gauntlet"
-                exit 1
-                ;;
+            echo "Available apps: ak-dashboard, secret-santa, pickup-soccer, personal-portfolio, fm-team-draw, color-crafter, amer-gauntlet"
+            exit 1
+            ;;
     esac
 done
 

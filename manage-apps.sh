@@ -22,6 +22,7 @@ APP_DIRS=(
     "fm-team-draw"
     "color-crafter"
     "amer-gauntlet"
+    "time-buddy"
 )
 
 # Help function
@@ -70,6 +71,7 @@ AVAILABLE APPS:
     - fm-team-draw
     - color-crafter
     - amer-gauntlet
+    - time-buddy
 
 NOTES:
     - At least one of --push or --deploy must be specified
